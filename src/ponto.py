@@ -1,6 +1,6 @@
 from typing import Any, Self
 
-from src.vetor import Vetor
+from vetor import Vetor
 
 class Ponto:
 

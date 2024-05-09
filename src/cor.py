@@ -1,7 +1,6 @@
 from typing import Self
 
-from src.vetor import *
-
+from vetor import Vetor
 
 class Cor(Vetor):
     """Classe que representa uma cor RGB e herda de Vetor"""
