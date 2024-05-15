@@ -1,5 +1,6 @@
 from ponto import Ponto
 from vetor import Vetor
+from ray import Ray
 
 class Camera:
 
@@ -24,3 +25,17 @@ class Camera:
     def nova_mira(self, novoM: Ponto):
         self.M = novoM
         self.vetores_ortonormais()
+
+    def get_ray(self, i: int, j: int) -> Ray:
+        """Returns a ray from the camera to the pixel (i, j)"""
+        centro_tela = (self.W * self.d) + self.C
+
+        i_normalizado = (i - self.Hres / 2) / self.Hres
+        j_normalizado = (j - self.Vres / 2) / self.Vres
+
+        vetor_i_offset = self.U * i_normalizado
+        vetor_j_offset = self.V * j_normalizado
+
+        ponto = centro_tela + vetor_i_offset + vetor_j_offset
+        direcao = ponto - self.C
+        return Ray(self.C, direcao)
