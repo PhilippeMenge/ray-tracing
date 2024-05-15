@@ -1,4 +1,4 @@
-from typing import Any, Self
+from typing_extensions import Any, Self
 
 from vetor import Vetor
 

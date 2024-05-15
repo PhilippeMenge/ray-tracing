@@ -1,5 +1,3 @@
-from typing import Self
-
 from vetor import Vetor
 
 class Cor(Vetor):

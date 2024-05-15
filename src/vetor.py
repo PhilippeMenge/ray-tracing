@@ -1,5 +1,5 @@
 import math
-from typing import Any, Self
+from typing_extensions import Any, Self
 
 class Vetor:
     def __init__(self, x: float, y: float, z: float) -> None:
