@@ -8,14 +8,8 @@ class Ray:
         self.origem = origem
         self.direcao = direcao.normalizado()
 
-    def __str__(self) -> str:
-        return f"Ray(Origem:{self.origem}, Direcao:{self.direcao.__repr__()})"
-
     def get_origem(self) -> Ponto:
         return self.origem
 
     def get_direcao(self) -> Vetor:
         return self.direcao
-
-    def point_at_parameter(self, t: float):
-        return self.origem + (self.direcao*t)
