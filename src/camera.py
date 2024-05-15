@@ -27,7 +27,7 @@ class Camera:
         self.vetores_ortonormais()
 
     def get_ray(self, i: int, j: int) -> Ray:
-        """Returns a ray from the camera to the pixel (i, j)"""
+        """Retorna um ray saindo da camera até o pixel (i, j)"""
         centro_tela = (self.W * self.d) + self.C
 
         i_normalizado = (i - self.Hres / 2) / self.Hres
