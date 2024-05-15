@@ -20,13 +20,4 @@ class Cor(Vetor):
     def b(self):
         return self.z
 
-    def __add__(self, c2: Self) -> Self:
-        return Cor(
-            min(self.r + c2.r, 255),
-            min(self.g + c2.g, 255),
-            min(self.b + c2.b, 255),
-        )
-
-    def __repr__(self) -> str:
-        return f"Cor({self.r}, {self.g}, {self.b})"
 
