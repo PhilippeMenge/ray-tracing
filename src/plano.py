@@ -1,11 +1,14 @@
 from vetor import Vetor
 from ponto import Ponto
 from ray import Ray
+from objeto import Objeto
+from material import Material
 
-class Plano:
+class Plano(Objeto):
     """Classe para definir planos 3D e seus métodos."""
 
-    def __init__(self, normal: Vetor, ponto: Ponto):
+    def __init__(self, material: Material, normal: Vetor, ponto: Ponto):
+        super().__init__(material)
         self.normal = normal.normalizado()
         self.ponto = ponto
 
