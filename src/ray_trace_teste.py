@@ -43,18 +43,18 @@ def renderizar_cena(cena: Cena) -> Imagem:
 def main():
     material_esfera1 = Material(Cor(0, 0, 255))
     material_esfera2 = Material(Cor(255, 0, 255))
-    material_plano = Material(Cor(0, 255, 0))
+    material_plano = Material(Cor(0, 255, 255))
     objetos = [
-        Esfera(material=material_esfera1, centro=Ponto(5, 0.4, 0), raio=0.5),
-        Esfera(material=material_esfera2, centro=Ponto(3, -0.4, 0), raio=0.5),
-        Plano(material=material_plano, normal=Vetor(1, 0, 0), ponto=Ponto(-2, 0, 0))
+        Esfera(material=material_esfera1, centro=Ponto(0, -2, 0), raio=5),
+        Esfera(material=material_esfera2, centro=Ponto(10, 2, 0), raio=5),
+        Plano(material=material_plano, normal=Vetor(0, 0, 1), ponto=Ponto(0, 0, 0))
     ]
 
     camera = Camera(
-        C=Ponto(100, 0, 0),
-        M=Ponto(0, 0, 0),
-        Vup=Vetor(0, 0, 1),
-        d=50,
+        C=Ponto(100, 0, 1),
+        M=Ponto(0, 0, 1),
+        Vup=Vetor(0, 0, -1),
+        d=5,
         Vres=500,
         Hres=500
     )
