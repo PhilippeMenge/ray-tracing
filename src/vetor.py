@@ -29,6 +29,9 @@ class Vetor:
     def __abs__(self) -> float:
         return math.sqrt(self.x**2 + self.y**2 + self.z**2)
 
+    def __neg__(self) -> Self:
+        return self.__class__(-self.x, -self.y, -self.z)
+
     def normalizado(self) -> Self:
         """Retorna o vetor normalizado"""
         return self / abs(self)
