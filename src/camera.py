@@ -30,8 +30,8 @@ class Camera:
         """Retorna um ray saindo da camera até o pixel (i, j)"""
         centro_tela = (self.W * self.d) + self.C
 
-        i_normalizado = (i - self.Hres / 2) / self.Hres
-        j_normalizado = (j - self.Vres / 2) / self.Vres
+        i_normalizado = 2*(i - self.Hres / 2) / self.Hres
+        j_normalizado = 2*(j - self.Vres / 2) / self.Vres
 
         vetor_i_offset = self.U * i_normalizado
         vetor_j_offset = self.V * j_normalizado
