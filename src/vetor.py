@@ -1,5 +1,4 @@
 import math
-from ponto import Ponto
 from typing_extensions import Any, Self
 
 class Vetor:
@@ -8,9 +7,7 @@ class Vetor:
         self.y = y
         self.z = z
 
-    def __add__(self, v2: Self | Ponto) -> Self | Ponto:
-        if isinstance(v2, Ponto):
-            return v2 + self
+    def __add__(self, v2: Self) -> Self:
         return self.__class__(self.x + v2.x, self.y + v2.y, self.z + v2.z)
 
     def __sub__(self, v2: Self) -> Self:
