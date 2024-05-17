@@ -6,6 +6,7 @@ from cor import Cor
 from ponto import Ponto
 from vetor import Vetor
 from esfera import Esfera
+from plano import Plano
 from material import Material
 
 
@@ -40,19 +41,23 @@ def renderizar_cena(cena: Cena) -> Imagem:
 
 
 def main():
+    #material_esfera1 = Material(Cor(0, 0, 255))
+    #material_esfera2 = Material(Cor(255, 0, 255))
+    material_plano = Material(Cor(0, 255, 255))
+    objetos = [
+        #Esfera(material=material_esfera1, centro=Ponto(0, 0.4, 0), raio=0.5),
+        #Esfera(material=material_esfera2, centro=Ponto(1, -0.4, 0), raio=0.5),
+        Plano(material=material_plano, normal=Vetor(0, 0, 1), ponto=Ponto(0, 0, 0))
+    ]
+
     camera = Camera(
-        C=Ponto(0, 0, 0),
-        M=Ponto(200, 0, 0),
+        C=Ponto(100, 0, 0),
+        M=Ponto(0, 0, 0),
         Vup=Vetor(0, 1, 0),
-        d=90,
+        d=50,
         Vres=500,
         Hres=500
     )
-
-    material_esfera = Material(Cor(255, 0, 0))
-    objetos = [
-        Esfera(material=material_esfera, centro=Ponto(200, 0, 0), raio=1),
-    ]
 
     cena = Cena(
         camera=camera,
