@@ -14,9 +14,9 @@ class Camera:
         self.vetores_ortonormais()
 
     def vetores_ortonormais(self):
-        self.W = (self.C - self.M).normalizado()
+        self.W = -((self.C - self.M).normalizado())
         self.U = self.Vup.produto_vetorial(self.W).normalizado()
-        self.V = self.W.produto_vetorial(self.U)
+        self.V = self.W.produto_vetorial(self.U).normalizado()
 
     def novo_local(self, novoC: Ponto):
         self.C = novoC
