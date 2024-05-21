@@ -8,6 +8,7 @@ from vetor import Vetor
 from esfera import Esfera
 from plano import Plano
 from material import Material
+from triangulo import Triangulo
 
 
 def get_cor_intersecao(ray: Ray, cena: Cena) -> Cor:
@@ -44,14 +45,19 @@ def main():
     material_esfera1 = Material(Cor(0, 0, 255))
     material_esfera2 = Material(Cor(255, 0, 255))
     material_plano = Material(Cor(0, 255, 255))
+    material_triangulo = Material(Cor(0, 0, 255))
+
     objetos = [
-        Esfera(material=material_esfera1, centro=Ponto(0, -2, 0), raio=5),
-        Esfera(material=material_esfera2, centro=Ponto(10, 2, 0), raio=5),
-        Plano(material=material_plano, normal=Vetor(0, 0, 1), ponto=Ponto(0, 0, 0))
+        #Esfera(material=material_esfera1, centro=Ponto(0, -10, 0), raio=5),
+        #Esfera(material=material_esfera2, centro=Ponto(-2, 2, 0), raio=5),
+        #Plano(material=material_plano, normal=Vetor(0, 0, 1), ponto=Ponto(0, 0, 0)),
+        Triangulo(
+            material=material_triangulo,
+            arestas=(Ponto(0, -1, 0), Ponto(0, 1, 0), Ponto(0, 0, 2))),
     ]
 
     camera = Camera(
-        C=Ponto(100, 0, 1),
+        C=Ponto(50, 0, 1),
         M=Ponto(0, 0, 1),
         Vup=Vetor(0, 0, -1),
         d=5,
