@@ -32,6 +32,10 @@ class Vetor:
     def __neg__(self) -> Self:
         return self.__class__(-self.x, -self.y, -self.z)
 
+    def norma(self) -> float:
+        """Returna a norma do vetor"""
+        return abs(self)
+
     def normalizado(self) -> Self:
         """Retorna o vetor normalizado"""
         return self / abs(self)
