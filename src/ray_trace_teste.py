@@ -9,6 +9,7 @@ from esfera import Esfera
 from plano import Plano
 from material import Material
 from triangulo import Triangulo
+from malha_triangulo import MalhaTriangulos
 
 
 def get_cor_intersecao(ray: Ray, cena: Cena) -> Cor:
@@ -47,18 +48,23 @@ def main():
     material_plano = Material(Cor(0, 255, 255))
     material_triangulo = Material(Cor(0, 0, 255))
 
-    objetos = [
-        #Esfera(material=material_esfera1, centro=Ponto(0, -10, 0), raio=5),
-        #Esfera(material=material_esfera2, centro=Ponto(-2, 2, 0), raio=5),
-        #Plano(material=material_plano, normal=Vetor(0, 0, 1), ponto=Ponto(0, 0, 0)),
-        Triangulo(
-            material=material_triangulo,
-            arestas=(Ponto(0, -1, 0), Ponto(0, 1, 0), Ponto(0, 0, 2))),
+
+    triangulos = [
+            Triangulo(material=material_triangulo, vertices=(Ponto(0, 0, 0), Ponto(0, -1, 2), Ponto(0, 1, 2))),
+            #Triangle(material=material_triangulo, points=(Ponto(0, 0, 0), Ponto(-2, -1, 0), Ponto(-2, 1, 0))),
+            Triangulo(material=material_triangulo, vertices=(Ponto(0, 0, 0), Ponto(0, -1, -2), Ponto(0, 1, -2))),
+            Triangulo(material=material_triangulo, vertices=(Ponto(0, 0, 0), Ponto(0, 1, 2), Ponto(0, 2, 0))),
+            Triangulo(material=Material(Cor(0, 255, 255)), vertices=(Ponto(0, 0, 0), Ponto(0, 1, -2), Ponto(0, 2, 0))),
+            Triangulo(material=Material(Cor(255, 0, 0)), vertices=(Ponto(0, 0, 0), Ponto(0, -1, -2), Ponto(0, -2, 0))),
+            Triangulo(material=Material(Cor(0, 255, 0)), vertices=(Ponto(0, 0, 0), Ponto(0, -1, 2), Ponto(0, -2, 0))),
     ]
 
+    mesh = MalhaTriangulos(material= Material(Cor(255,0,0)), triangulos=triangulos)
+    objetos = [mesh]
+
     camera = Camera(
-        C=Ponto(50, 0, 1),
-        M=Ponto(0, 0, 1),
+        C=Ponto(25, 0, 0),
+        M=Ponto(0, 0, 0),
         Vup=Vetor(0, 0, -1),
         d=5,
         Vres=500,

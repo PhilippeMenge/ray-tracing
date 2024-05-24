@@ -19,6 +19,9 @@ class Vetor:
         else:
             return self.__class__(self.x * v2, self.y * v2, self.z * v2)
 
+    def __rmul__(self, other: float) -> Self:
+        return self.__mul__(other)
+
     def __truediv__(self, v2: Any) -> Self:
         if isinstance(v2, Vetor):
             return self.__class__(self.x / v2.x, self.y / v2.y, self.z / v2.z)
