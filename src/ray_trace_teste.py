@@ -48,22 +48,35 @@ def main():
     material_plano = Material(Cor(0, 255, 255))
     material_triangulo = Material(Cor(0, 0, 255))
 
-
-    triangulos = [
-            Triangulo(material=material_triangulo, vertices=(Ponto(0, 0, 0), Ponto(0, -1, 2), Ponto(0, 1, 2))),
-            #Triangle(material=material_triangulo, points=(Ponto(0, 0, 0), Ponto(-2, -1, 0), Ponto(-2, 1, 0))),
-            Triangulo(material=material_triangulo, vertices=(Ponto(0, 0, 0), Ponto(0, -1, -2), Ponto(0, 1, -2))),
-            Triangulo(material=material_triangulo, vertices=(Ponto(0, 0, 0), Ponto(0, 1, 2), Ponto(0, 2, 0))),
-            Triangulo(material=Material(Cor(0, 255, 255)), vertices=(Ponto(0, 0, 0), Ponto(0, 1, -2), Ponto(0, 2, 0))),
-            Triangulo(material=Material(Cor(255, 0, 0)), vertices=(Ponto(0, 0, 0), Ponto(0, -1, -2), Ponto(0, -2, 0))),
-            Triangulo(material=Material(Cor(0, 255, 0)), vertices=(Ponto(0, 0, 0), Ponto(0, -1, 2), Ponto(0, -2, 0))),
+    vertices = [
+        Ponto(-1, -1, -1),
+        Ponto(1, -1, -1),
+        Ponto(1, 1, -1),
+        Ponto(-1, 1, -1),
+        Ponto(-1, -1, 1),
+        Ponto(1, -1, 1),
+        Ponto(1, 1, 1),
+        Ponto(-1, 1, 1),
     ]
 
-    mesh = MalhaTriangulos(material= Material(Cor(255,0,0)), triangulos=triangulos)
+    triplas_vertice = [
+        (vertices[0], vertices[1], vertices[2]), (vertices[0], vertices[2], vertices[3]),  # Front face
+        (vertices[4], vertices[5], vertices[6]), (vertices[4], vertices[6], vertices[7]),  # Back face
+        (vertices[0], vertices[3], vertices[7]), (vertices[0], vertices[7], vertices[4]),  # Left face
+        (vertices[1], vertices[2], vertices[6]), (vertices[1], vertices[6], vertices[5]),  # Right face
+        (vertices[3], vertices[2], vertices[6]), (vertices[3], vertices[6], vertices[7]),  # Top face
+        (vertices[0], vertices[1], vertices[5]), (vertices[0], vertices[5], vertices[4])   # Bottom face
+    ]
+
+    triangulos = [
+        Triangulo(material=material_triangulo, vertices=triplas_vertice[i]) for i in range(len(triplas_vertice))
+    ]
+    mesh = MalhaTriangulos(material=material_triangulo, triangulos=triangulos)
+
     objetos = [mesh]
 
     camera = Camera(
-        C=Ponto(25, 0, 0),
+        C=Ponto(10, 0, 0),
         M=Ponto(0, 0, 0),
         Vup=Vetor(0, 0, -1),
         d=5,
