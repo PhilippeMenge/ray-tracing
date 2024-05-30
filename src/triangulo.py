@@ -2,6 +2,7 @@ from ponto import Ponto
 from ray import Ray
 from objeto import Objeto
 from material import Material
+from vetor import Vetor
 
 class Triangulo(Objeto):
 
@@ -13,15 +14,18 @@ class Triangulo(Objeto):
         super().__init__(material)
         self.vertices = vertices
 
+    @property
+    def normal(self) -> Vetor:
+        return (self.vertices[1] - self.vertices[0]).produto_vetorial(self.vertices[2] - self.vertices[0])
+
     def get_intersecao(self, ray: Ray) -> None | float:
         aresta_ab = self.vertices[1] - self.vertices[0] # edge1
         aresta_ac = self.vertices[2] - self.vertices[0] # edge2
         aresta_bc = self.vertices[2] - self.vertices[1] # edge3
         
         # Checando interseção com plano o qual o triangulo pertence
-        normal = aresta_ab.produto_vetorial(aresta_ac)
-        denominador = ray.direcao.produto_escalar(normal)
-        numerador = normal.produto_escalar(self.vertices[0] - ray.origem)
+        denominador = ray.direcao.produto_escalar(self.normal)
+        numerador = self.normal.produto_escalar(self.vertices[0] - ray.origem)
         
         # Ray é paralelo ao plano, sem interseção
         if denominador == 0:
