@@ -3,6 +3,7 @@ from ponto import Ponto
 from ray import Ray
 from objeto import Objeto
 from material import Material
+from typing_extensions import Self
 
 class Plano(Objeto):
     """Classe para definir planos 3D e seus métodos."""
@@ -27,3 +28,8 @@ class Plano(Objeto):
             return distance
         else:
             return None
+
+    def transform(self, matrix: list[list[float]]) -> Self:
+        ponto = self.ponto.transform(matrix)
+        normal = self.normal.transform(matrix)
+        return self.__class__(self.material, normal, ponto)

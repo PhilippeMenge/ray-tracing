@@ -3,6 +3,7 @@ from ray import Ray
 from objeto import Objeto
 from material import Material
 from vetor import Vetor
+from typing_extensions import Self
 
 class Triangulo(Objeto):
 
@@ -19,9 +20,9 @@ class Triangulo(Objeto):
         return (self.vertices[1] - self.vertices[0]).produto_vetorial(self.vertices[2] - self.vertices[0])
 
     def get_intersecao(self, ray: Ray) -> None | float:
-        aresta_ab = self.vertices[1] - self.vertices[0] # edge1
-        aresta_ac = self.vertices[2] - self.vertices[0] # edge2
-        aresta_bc = self.vertices[2] - self.vertices[1] # edge3
+        aresta_ab = self.vertices[1] - self.vertices[0]
+        aresta_ac = self.vertices[2] - self.vertices[0]
+        aresta_bc = self.vertices[2] - self.vertices[1]
         
         # Checando interseção com plano o qual o triangulo pertence
         denominador = ray.direcao.produto_escalar(self.normal)
@@ -52,4 +53,8 @@ class Triangulo(Objeto):
             return t
         
         return None
+
+    def transform(self, matrix: list[list[float]]) -> Self:
+        vertices = tuple(vertice.transform(matrix) for vertice in self.vertices)
+        return self.__class__(self.material, vertices)
 

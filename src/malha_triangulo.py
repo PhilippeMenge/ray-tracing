@@ -3,6 +3,8 @@ from ray import Ray
 from objeto import Objeto
 from material import Material
 from vetor import Vetor
+from typing_extensions import Self
+
 
 class MalhaTriangulos(Objeto):
 
@@ -29,3 +31,7 @@ class MalhaTriangulos(Objeto):
             return None
 
         return distancia
+
+    def transform(self, matrix: list[list[float]]) -> Self:
+        triangulos = [triangulo.transform(matrix) for triangulo in self.triangulos]
+        return self.__class__(self.material, triangulos)

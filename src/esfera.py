@@ -3,6 +3,7 @@ from ray import Ray
 from objeto import Objeto
 from material import Material
 import math
+from typing_extensions import Self
 
 class Esfera(Objeto):
     """Classe para definir esferas e seus métodos."""
@@ -30,3 +31,12 @@ class Esfera(Objeto):
         distance2 = (-b_coeff - math.sqrt(discriminant)) / (2 * a_coeff)
 
         return min(distance1, distance2)
+
+    def transform(self, matrix: list[list[float]]) -> Self:
+        scale_factor = 1
+        if matrix[0][0] == matrix[1][1] == matrix[2][2]:
+            scale_factor = matrix[0][0]
+
+        centro = self.centro.transform(matrix)
+        return self.__class__(self.material, self.raio*scale_factor, centro)
+

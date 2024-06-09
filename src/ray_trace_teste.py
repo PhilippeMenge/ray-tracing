@@ -1,3 +1,5 @@
+import numpy as np
+
 from cena import Cena
 from ray import Ray
 from imagem import Imagem
@@ -48,32 +50,54 @@ def main():
     material_plano = Material(Cor(0, 255, 255))
     material_triangulo = Material(Cor(0, 0, 255))
 
+    matrix_translacao = [
+        [1, 0, 0, 0],
+        [0, 1, 0, 0],
+        [0, 0, 1, -1],
+        [0, 0, 0, 1]
+    ]
+
+    matrix_escala = [
+        [4, 0, 0, 0],
+        [0, 4, 0, 0],
+        [0, 0, 4, 0],
+        [0, 0, 0, 1]
+    ]
+
+    # Ângulo de rotação em radianos (90 graus)
+    theta = np.pi / 2
+    rotation_matrix_x = [
+        [1, 0, 0, 0],
+        [0, np.cos(theta), -np.sin(theta), 0],
+        [0, np.sin(theta), np.cos(theta), 0],
+        [0, 0, 0, 1]
+    ]
+
+    '''
+    material_triangulo = Material(Cor(123, 76, 85))
+    
     vertices = [
-        Ponto(-1, -1, -1),
-        Ponto(1, -1, -1),
-        Ponto(1, 1, -1),
-        Ponto(-1, 1, -1),
-        Ponto(-1, -1, 1),
-        Ponto(1, -1, 1),
-        Ponto(1, 1, 1),
-        Ponto(-1, 1, 1),
+        Ponto(0, 1, 0),
+        Ponto(0, -1, 0),
+        Ponto(0,  0, 1),
     ]
-
+    
     triplas_vertice = [
-        (vertices[0], vertices[1], vertices[2]), (vertices[0], vertices[2], vertices[3]),  # Front face
-        (vertices[4], vertices[5], vertices[6]), (vertices[4], vertices[6], vertices[7]),  # Back face
-        (vertices[0], vertices[3], vertices[7]), (vertices[0], vertices[7], vertices[4]),  # Left face
-        (vertices[1], vertices[2], vertices[6]), (vertices[1], vertices[6], vertices[5]),  # Right face
-        (vertices[3], vertices[2], vertices[6]), (vertices[3], vertices[6], vertices[7]),  # Top face
-        (vertices[0], vertices[1], vertices[5]), (vertices[0], vertices[5], vertices[4])   # Bottom face
+        (vertices[0], vertices[1], vertices[2])
     ]
-
+    
     triangulos = [
-        Triangulo(material=material_triangulo, vertices=triplas_vertice[i]) for i in range(len(triplas_vertice))
+        Triangle(material=material_triangulo, points=triplas_vertice[t]) for t in range(len(triplas_vertice))
     ]
-    mesh = MalhaTriangulos(material=material_triangulo, triangulos=triangulos)
+    
+    mesh = TriangleMesh(material=material_triangulo, triangles=triangulos)
+    mesh = mesh.transform(rotation_matrix_x)
+    '''
 
-    objetos = [mesh]
+    esfera = Esfera(material=material_esfera1, centro=Ponto(0, 0, 0), raio=0.1)
+    esfera = esfera.transform(np.dot(matrix_translacao, matrix_escala))
+
+    objetos = [esfera]
 
     camera = Camera(
         C=Ponto(10, 0, 0),
