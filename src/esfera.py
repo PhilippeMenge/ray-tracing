@@ -1,9 +1,11 @@
 from ponto import Ponto
+from vetor import Vetor
 from ray import Ray
 from objeto import Objeto
 from material import Material
 import math
 from typing_extensions import Self
+
 
 class Esfera(Objeto):
     """Classe para definir esferas e seus métodos."""
@@ -16,21 +18,32 @@ class Esfera(Objeto):
     def __repr__(self) -> str:
         return f"Sphere(Center:{self.centro}, Radius:{self.raio})"
 
-    def get_intersecao(self, ray: Ray) -> float | None:
+    def get_intersecao(self, ray: Ray) -> tuple[float, Vetor] | tuple[None, None]:
         oc = ray.origem - self.centro
         a_coeff = ray.direcao.produto_escalar(ray.direcao)
         b_coeff = 2 * ray.direcao.produto_escalar(oc)
         c_coeff = oc.produto_escalar(oc) - self.raio ** 2
 
-        discriminant = b_coeff**2 - 4 * a_coeff * c_coeff
+        delta = b_coeff**2 - 4 * a_coeff * c_coeff
 
-        if discriminant < 0:
-            return None
+        EPSILON = 0.0001
+        if delta >= 0:
+            distancia = (-b_coeff - math.sqrt(delta)) / (2*a_coeff)
+            if distancia > EPSILON:
+                return distancia, self.get_normal_no_ponto(
+                    ray.origem + distancia * ray.direcao
+                )
+            # O raiz de cima é sempre a menor, logo talvez nem precise desse check abaixo.
+            distancia = (-b_coeff + math.sqrt(delta)) / (2*a_coeff)
+            if distancia > EPSILON:
+                return distancia, self.get_normal_no_ponto(
+                    ray.origem + distancia * ray.direcao
+                )
 
-        distance1 = (-b_coeff + math.sqrt(discriminant)) / (2 * a_coeff)
-        distance2 = (-b_coeff - math.sqrt(discriminant)) / (2 * a_coeff)
+        return None, None
 
-        return min(distance1, distance2)
+    def get_normal_no_ponto(self, ponto: Ponto) -> Vetor:
+        return (ponto - self.centro).normalizado()
 
     def transform(self, matrix: list[list[float]]) -> Self:
         scale_factor = 1

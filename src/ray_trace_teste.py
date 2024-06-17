@@ -1,5 +1,4 @@
 import numpy as np
-
 from cena import Cena
 from ray import Ray
 from imagem import Imagem
@@ -8,26 +7,97 @@ from cor import Cor
 from ponto import Ponto
 from vetor import Vetor
 from esfera import Esfera
+from luz import Luz
+from objeto import Objeto
 from plano import Plano
 from material import Material
 from triangulo import Triangulo
 from malha_triangulo import MalhaTriangulos
 
 
-def get_cor_intersecao(ray: Ray, cena: Cena) -> Cor:
+def get_intersecao_mais_proxima(
+        ray: Ray, cena: Cena
+) -> tuple[Ponto, Vetor, Objeto] | tuple[None, None, None]:
+
     obj_mais_proximo = None
     obj_mais_proximo_dist = float("inf")
+    obj_mais_proximo_normal = None
     for obj in cena.objetos:
-        dist_intersecao = obj.get_intersecao(ray)
-        if dist_intersecao is not None:
-            if dist_intersecao < obj_mais_proximo_dist:
-                obj_mais_proximo = obj
-                obj_mais_proximo_dist = dist_intersecao
+        dist_intersecao, normal_no_ponto = obj.get_intersecao(ray)
+        if (dist_intersecao is not None) and (dist_intersecao < obj_mais_proximo_dist):
+            obj_mais_proximo = obj
+            obj_mais_proximo_dist = dist_intersecao
+            obj_mais_proximo_normal = normal_no_ponto
 
-    if obj_mais_proximo is None:
+    if (obj_mais_proximo is None) or (obj_mais_proximo_normal is None):
+        return None, None, None
+
+    return (
+        ray.origem + ray.direcao*obj_mais_proximo_dist,
+        obj_mais_proximo_normal,
+        obj_mais_proximo,
+    )
+
+
+def get_cor(
+        objeto_intersecao: Objeto,
+        ponto_intersecao: Ponto,
+        normal_no_ponto: Vetor,
+        cena: Cena,
+        posicao_observador: Ponto | None = None,
+) -> Cor:
+    """Retorna a cor de um dado ponto de acordo com o modelo de Phong."""
+    posicao_observador = (
+        posicao_observador if posicao_observador else cena.camera.C
+    )
+
+    # Ambient
+    cor = objeto_intersecao.material.get_componente_ambiental(
+        cena.cor_ambiente
+    )
+
+    for luz in cena.luzes:
+
+        # Diffuse
+        cor += objeto_intersecao.material.get_componente_difusa(
+            luz=luz,
+            ponto_intersecao=ponto_intersecao,
+            normal_no_ponto=normal_no_ponto,
+        )
+
+        # Specular
+        cor += objeto_intersecao.material.get_componente_especular(
+            luz=luz,
+            ponto_intersecao=ponto_intersecao,
+            normal_no_ponto=normal_no_ponto,
+            posicao_observador=posicao_observador,
+        )
+
+    return cor
+
+
+def get_cor_intersecao(ray: Ray, cena: Cena) -> Cor:
+    """Trace a ray and return the color that should be displayed, according to Phong shading."""
+    (
+        ponto_intersecao,
+        normal_no_ponto,
+        objeto_intersecao,
+    ) = get_intersecao_mais_proxima(ray, cena)
+
+    if objeto_intersecao is None:
         return cena.cor_ambiente
 
-    return obj_mais_proximo.material.cor
+    cor = Cor(0, 0, 0)
+
+    cor += get_cor(
+        objeto_intersecao=objeto_intersecao,
+        ponto_intersecao=ponto_intersecao,
+        normal_no_ponto=normal_no_ponto,
+        cena=cena,
+        posicao_observador=ray.origem,
+    )
+
+    return cor
 
 
 def renderizar_cena(cena: Cena) -> Imagem:
@@ -45,73 +115,49 @@ def renderizar_cena(cena: Cena) -> Imagem:
 
 
 def main():
-    material_esfera1 = Material(Cor(0, 0, 255))
-    material_esfera2 = Material(Cor(255, 0, 255))
-    material_plano = Material(Cor(0, 255, 255))
-    material_triangulo = Material(Cor(0, 0, 255))
 
-    matrix_translacao = [
-        [1, 0, 0, 0],
-        [0, 1, 0, 0],
-        [0, 0, 1, -1],
-        [0, 0, 0, 1]
-    ]
+    coef_difusao = 0.7
+    coef_especular = 0.8
+    coef_ambiental = 0.1
+    coef_rugosidade = 25
 
-    matrix_escala = [
-        [4, 0, 0, 0],
-        [0, 4, 0, 0],
-        [0, 0, 4, 0],
-        [0, 0, 0, 1]
-    ]
+    material_esfera1 = Material(
+        cor=Cor(255, 215, 0),
+        coeficiente_difusao=coef_difusao,
+        coeficiente_ambiental=coef_ambiental,
+        coeficiente_especular=coef_especular,
+        coeficiente_rugosidade=coef_rugosidade
+    )
 
-    # Ângulo de rotação em radianos (90 graus)
-    theta = np.pi / 2
-    rotation_matrix_x = [
-        [1, 0, 0, 0],
-        [0, np.cos(theta), -np.sin(theta), 0],
-        [0, np.sin(theta), np.cos(theta), 0],
-        [0, 0, 0, 1]
-    ]
+    material_plano = Material(
+        cor=Cor(200, 100, 200),
+        coeficiente_difusao=coef_difusao,
+        coeficiente_ambiental=coef_ambiental,
+        coeficiente_especular=coef_especular,
+        coeficiente_rugosidade=coef_rugosidade
+    )
 
-    '''
-    material_triangulo = Material(Cor(123, 76, 85))
-    
-    vertices = [
-        Ponto(0, 1, 0),
-        Ponto(0, -1, 0),
-        Ponto(0,  0, 1),
+    objetos = [
+        Esfera(material=material_esfera1, centro=Ponto(0, -2, 0), raio=5),
+        Plano(material=material_plano, normal=Vetor(0, 0, 1), ponto=Ponto(0, 0, 0))
     ]
-    
-    triplas_vertice = [
-        (vertices[0], vertices[1], vertices[2])
-    ]
-    
-    triangulos = [
-        Triangle(material=material_triangulo, points=triplas_vertice[t]) for t in range(len(triplas_vertice))
-    ]
-    
-    mesh = TriangleMesh(material=material_triangulo, triangles=triangulos)
-    mesh = mesh.transform(rotation_matrix_x)
-    '''
-
-    esfera = Esfera(material=material_esfera1, centro=Ponto(0, 0, 0), raio=0.1)
-    esfera = esfera.transform(np.dot(matrix_translacao, matrix_escala))
-
-    objetos = [esfera]
 
     camera = Camera(
-        C=Ponto(10, 0, 0),
-        M=Ponto(0, 0, 0),
+        C=Ponto(100, 0, 1),
+        M=Ponto(0, 0, 1),
         Vup=Vetor(0, 0, -1),
         d=5,
         Vres=500,
         Hres=500
     )
 
+    luzes = [Luz(posicao=Ponto(0, -2, 10), cor=Cor(255, 255, 255))]
+
     cena = Cena(
         camera=camera,
         objetos=objetos,
         cor_ambiente=Cor(0, 0, 0),
+        luzes=luzes
     )
 
     img = renderizar_cena(cena)

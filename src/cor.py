@@ -1,4 +1,5 @@
 from vetor import Vetor
+from typing_extensions import Self
 
 class Cor(Vetor):
     """Classe que representa uma cor RGB e herda de Vetor"""
@@ -17,5 +18,12 @@ class Cor(Vetor):
     @property
     def b(self):
         return self.z
+
+    def __add__(self, outra_cor: Self) -> Self:
+        return Cor(
+            min(self.r + outra_cor.r, 255),
+            min(self.g + outra_cor.g, 255),
+            min(self.b + outra_cor.b, 255),
+        )
 
 

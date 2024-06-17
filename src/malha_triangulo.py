@@ -20,17 +20,19 @@ class MalhaTriangulos(Objeto):
             normais.append(triangulo.normal)
         return normais
 
-    def get_intersecao(self, ray: Ray) -> None | float:
+    def get_intersecao(self, ray: Ray) -> tuple[float, Vetor] | tuple[None, None]:
         distancia = float("inf")
+        normal = None
         for triangulo in self.triangulos:
-            triangulo_dist = triangulo.get_intersecao(ray)
+            triangulo_dist, triangulo_normal = triangulo.get_intersecao(ray)
             if triangulo_dist is not None and triangulo_dist < distancia:
                 distancia = triangulo_dist
+                normal = triangulo_normal
 
-        if distancia is None or distancia == float("inf"):
-            return None
+        if distancia == float("inf") or normal is None:
+            return None, None
 
-        return distancia
+        return distancia, normal
 
     def transform(self, matrix: list[list[float]]) -> Self:
         triangulos = [triangulo.transform(matrix) for triangulo in self.triangulos]

@@ -5,6 +5,7 @@ from material import Material
 from vetor import Vetor
 from typing_extensions import Self
 
+
 class Triangulo(Objeto):
 
     def __init__(
@@ -17,9 +18,11 @@ class Triangulo(Objeto):
 
     @property
     def normal(self) -> Vetor:
-        return (self.vertices[1] - self.vertices[0]).produto_vetorial(self.vertices[2] - self.vertices[0])
+        return ((self.vertices[1] - self.vertices[0])
+                .produto_vetorial(self.vertices[2] - self.vertices[0])
+                .normalizado())
 
-    def get_intersecao(self, ray: Ray) -> None | float:
+    def get_intersecao(self, ray: Ray) -> tuple[float, Vetor] | tuple[None, None]:
         aresta_ab = self.vertices[1] - self.vertices[0]
         aresta_ac = self.vertices[2] - self.vertices[0]
         aresta_bc = self.vertices[2] - self.vertices[1]
@@ -30,11 +33,11 @@ class Triangulo(Objeto):
         
         # Ray é paralelo ao plano, sem interseção
         if denominador == 0:
-            return None
+            return None, None
 
         t = numerador / denominador
         if t < 0:
-            return None
+            return None, None
         
         area_total = (aresta_ab.produto_vetorial(aresta_ac)).norma() / 2
         ponto_intersecao = ray.origem + t*ray.direcao
@@ -50,9 +53,12 @@ class Triangulo(Objeto):
         
         EPSILON = 0.001
         if 1-EPSILON <= (u + w + v) <= 1+EPSILON:
-            return t
+            return t, self.normal
         
-        return None
+        return None, None
+
+    def get_normal_no_ponto(self, ponto: Ponto) -> Vetor:
+        return self.normal
 
     def transform(self, matrix: list[list[float]]) -> Self:
         vertices = tuple(vertice.transform(matrix) for vertice in self.vertices)
