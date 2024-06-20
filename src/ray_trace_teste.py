@@ -51,21 +51,28 @@ def get_cor(
         posicao_observador if posicao_observador else cena.camera.C
     )
 
-    # Ambient
+    # Ambiental
     cor = objeto_intersecao.material.get_componente_ambiental(
         cena.cor_ambiente
     )
 
     for luz in cena.luzes:
 
-        # Diffuse
+        # Sombra
+        raio_luz = Ray(ponto_intersecao, luz.posicao - ponto_intersecao)
+        _, _, obj = get_intersecao_mais_proxima(cena=cena, ray=raio_luz)
+
+        if obj is not None and obj != objeto_intersecao:
+            continue
+
+        # Difusa
         cor += objeto_intersecao.material.get_componente_difusa(
             luz=luz,
             ponto_intersecao=ponto_intersecao,
             normal_no_ponto=normal_no_ponto,
         )
 
-        # Specular
+        # Especular
         cor += objeto_intersecao.material.get_componente_especular(
             luz=luz,
             ponto_intersecao=ponto_intersecao,
@@ -77,7 +84,7 @@ def get_cor(
 
 
 def get_cor_intersecao(ray: Ray, cena: Cena) -> Cor:
-    """Trace a ray and return the color that should be displayed, according to Phong shading."""
+    """Retorna a colar que deve ser mostrada de acordo com a equação de iluminação de Phong."""
     (
         ponto_intersecao,
         normal_no_ponto,
@@ -87,7 +94,7 @@ def get_cor_intersecao(ray: Ray, cena: Cena) -> Cor:
     if objeto_intersecao is None:
         return cena.cor_ambiente
 
-    cor = Cor(0, 0, 0)
+    cor = cena.cor_ambiente
 
     cor += get_cor(
         objeto_intersecao=objeto_intersecao,
@@ -121,8 +128,8 @@ def main():
     coef_ambiental = 0.1
     coef_rugosidade = 25
 
-    material_esfera1 = Material(
-        cor=Cor(255, 215, 0),
+    material_esfera = Material(
+        cor=Cor(255, 0, 0),
         coeficiente_difusao=coef_difusao,
         coeficiente_ambiental=coef_ambiental,
         coeficiente_especular=coef_especular,
@@ -130,7 +137,7 @@ def main():
     )
 
     material_plano = Material(
-        cor=Cor(200, 100, 200),
+        cor=Cor(0, 0, 255),
         coeficiente_difusao=coef_difusao,
         coeficiente_ambiental=coef_ambiental,
         coeficiente_especular=coef_especular,
@@ -138,12 +145,13 @@ def main():
     )
 
     objetos = [
-        Esfera(material=material_esfera1, centro=Ponto(0, -2, 0), raio=5),
+        Esfera(material=material_esfera, centro=Ponto(0, -2, 0), raio=2.5),
+        Esfera(material=material_esfera, centro=Ponto(0, 2, 0), raio=1),
         Plano(material=material_plano, normal=Vetor(0, 0, 1), ponto=Ponto(0, 0, 0))
     ]
 
     camera = Camera(
-        C=Ponto(100, 0, 1),
+        C=Ponto(25, 0, 1),
         M=Ponto(0, 0, 1),
         Vup=Vetor(0, 0, -1),
         d=5,
@@ -151,7 +159,7 @@ def main():
         Hres=500
     )
 
-    luzes = [Luz(posicao=Ponto(0, -2, 10), cor=Cor(255, 255, 255))]
+    luzes = [Luz(posicao=Ponto(0, -10, 10), cor=Cor(255, 255, 255))]
 
     cena = Cena(
         camera=camera,
