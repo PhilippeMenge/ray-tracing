@@ -83,7 +83,7 @@ def get_cor(
     return cor
 
 
-def get_cor_intersecao(ray: Ray, cena: Cena) -> Cor:
+def get_cor_intersecao(ray: Ray, cena: Cena, level: int = 0) -> Cor:
     """Retorna a colar que deve ser mostrada de acordo com a equação de iluminação de Phong."""
     (
         ponto_intersecao,
@@ -104,7 +104,75 @@ def get_cor_intersecao(ray: Ray, cena: Cena) -> Cor:
         posicao_observador=ray.origem,
     )
 
+    MAX_DEPTH = 5
+    if level < MAX_DEPTH:
+        material = objeto_intersecao.material
+        normal = normal_no_ponto
+        omega = -ray.direcao
+        relative_transmission_coeff = material.coeficiente_refracao
+
+        # If the ray is inside the object, the normal should be flipped.
+        if normal.produto_escalar(omega) < 0:
+            normal = -normal
+
+            # If the ray is inside the object, the transmission coefficient should be inverted.
+            relative_transmission_coeff = (
+                0
+                if relative_transmission_coeff == 0
+                else 1 / relative_transmission_coeff
+            )
+
+        # Reflection
+        if material.coeficiente_reflexao > 0:
+            reflected_ray_pos = ponto_intersecao + (normal * 0.01)
+            reflected_ray_dir = (
+                    2 * normal_no_ponto
+                    * (normal_no_ponto.produto_escalar(ray.direcao))
+                    - ray.direcao
+            ).normalizado()
+            reflected_ray = Ray(reflected_ray_pos, reflected_ray_dir)
+
+            cor += (
+                    get_cor_intersecao(reflected_ray, cena, level + 1)
+                    * material.coeficiente_reflexao
+            )
+
+        # Refraction / Transmission
+        if material.coeficiente_refracao > 0:
+            delta = 1 - (1 / relative_transmission_coeff**2) * (
+                    1 - normal.produto_escalar(omega) ** 2
+            )
+
+            # If delta is positive, the ray is refracted.
+            if delta >= 0:
+                inverse_transmission_coeff = 1 / relative_transmission_coeff
+
+                refracted_ray_dir = inverse_transmission_coeff * (
+                        ray.direcao - normal.produto_escalar(ray.direcao) * normal
+                ) - normal * np.sqrt(delta)
+                reflected_ray_pos = ponto_intersecao + (-normal * 0.01)
+                refracted_ray = Ray(reflected_ray_pos, refracted_ray_dir)
+
+                cor += (
+                        get_cor_intersecao(refracted_ray, cena, level + 1)
+                        * material.coeficiente_refracao
+                )
+            # If delta is negative, the ray is reflected. (Total internal reflection)
+            else:
+                reflected_ray_dir = (
+                        2 * normal_no_ponto
+                        * (normal_no_ponto.produto_escalar(ray.direcao))
+                        - ray.direcao
+                ).normalizado()
+                reflected_ray_pos = ponto_intersecao + (normal * 0.01)
+                reflected_ray = Ray(reflected_ray_pos, reflected_ray_dir)
+                cor += (
+                        get_cor_intersecao(reflected_ray, cena, level + 1)
+                        * material.coeficiente_refracao
+                )
+
     return cor
+
 
 
 def renderizar_cena(cena: Cena) -> Imagem:
@@ -123,31 +191,43 @@ def renderizar_cena(cena: Cena) -> Imagem:
 
 def main():
 
-    coef_difusao = 0.7
-    coef_especular = 0.8
-    coef_ambiental = 0.1
-    coef_rugosidade = 25
-
-    material_esfera = Material(
-        cor=Cor(255, 0, 0),
-        coeficiente_difusao=coef_difusao,
-        coeficiente_ambiental=coef_ambiental,
-        coeficiente_especular=coef_especular,
-        coeficiente_rugosidade=coef_rugosidade
+    # Vidro
+    material_esfera1 = Material(
+        cor=Cor(0, 0, 155),
+        coeficiente_difusao=0.1,
+        coeficiente_ambiental=0.1,
+        coeficiente_especular=0.9,
+        coeficiente_rugosidade=0,
+        coeficiente_reflexao=0.05,
+        coeficiente_refracao=1.5
     )
 
-    material_plano = Material(
-        cor=Cor(0, 0, 255),
-        coeficiente_difusao=coef_difusao,
-        coeficiente_ambiental=coef_ambiental,
-        coeficiente_especular=coef_especular,
-        coeficiente_rugosidade=coef_rugosidade
+    # Metal
+    material_esfera2 = Material(
+        cor=Cor(192, 192, 192),
+        coeficiente_difusao=0.3,
+        coeficiente_ambiental=0.1,
+        coeficiente_especular=0.7,
+        coeficiente_rugosidade=0.05,
+        coeficiente_reflexao=0.8,
+        coeficiente_refracao=0
+    )
+
+    material_esfera3 = Material(
+        cor=Cor(255, 0, 0),
+        coeficiente_difusao=0.8,
+        coeficiente_ambiental=0.2,
+        coeficiente_especular=0.1,
+        coeficiente_rugosidade=0.7,
+        coeficiente_reflexao=0.05,
+        coeficiente_refracao=0
     )
 
     objetos = [
-        Esfera(material=material_esfera, centro=Ponto(0, -2, 0), raio=2.5),
-        Esfera(material=material_esfera, centro=Ponto(0, 2, 0), raio=1),
-        Plano(material=material_plano, normal=Vetor(0, 0, 1), ponto=Ponto(0, 0, 0))
+        Esfera(material=material_esfera2, centro=Ponto(0, 0, 0), raio=2),
+        #Esfera(material=material_esfera2, centro=Ponto(-0.5, -3, 1), raio=2),
+        #Esfera(material=material_esfera3, centro=Ponto(0.5, 3, 1), raio=2),
+        #Plano(material=material_plano, normal=Vetor(0, 0, 1), ponto=Ponto(0, 0, 0))
     ]
 
     camera = Camera(

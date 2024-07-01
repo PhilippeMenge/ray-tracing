@@ -15,12 +15,16 @@ class Material:
             coeficiente_especular: float,
             coeficiente_ambiental: float,
             coeficiente_rugosidade: float,
+            coeficiente_reflexao: float,
+            coeficiente_refracao: float,
     ):
         self.cor = cor
         self.coeficiente_difusao = coeficiente_difusao
         self.coeficiente_especular = coeficiente_especular
         self.coeficiente_ambiental = coeficiente_ambiental
         self.coeficiente_rugosidade = coeficiente_rugosidade
+        self.coeficiente_reflexao = coeficiente_reflexao
+        self.coeficiente_refracao = coeficiente_refracao
 
     def get_componente_ambiental(self, cor_ambiente: Cor) -> Cor:
         """Retorna a componente ambiental de acordo com o modelo de Phong."""
