@@ -58,9 +58,9 @@ class Material:
 
         vetor_para_luz = (luz.posicao - ponto_intersecao).normalizado()
         vetor_para_luz_refetido = (
-                2 * normal_no_ponto
+                -2 * normal_no_ponto
                 * (normal_no_ponto.produto_escalar(vetor_para_luz))
-                - vetor_para_luz
+                + vetor_para_luz
         )
         vetor_para_observador = (posicao_observador - ponto_intersecao).normalizado()
 

@@ -104,75 +104,58 @@ def get_cor_intersecao(ray: Ray, cena: Cena, level: int = 0) -> Cor:
         posicao_observador=ray.origem,
     )
 
-    MAX_DEPTH = 5
-    if level < MAX_DEPTH:
+    max_level = 5
+    if level < max_level:
         material = objeto_intersecao.material
-        normal = normal_no_ponto
-        omega = -ray.direcao
-        relative_transmission_coeff = material.coeficiente_refracao
+        coef_refracao = material.coeficiente_refracao
 
-        # If the ray is inside the object, the normal should be flipped.
-        if normal.produto_escalar(omega) < 0:
-            normal = -normal
-
-            # If the ray is inside the object, the transmission coefficient should be inverted.
-            relative_transmission_coeff = (
-                0
-                if relative_transmission_coeff == 0
-                else 1 / relative_transmission_coeff
-            )
-
-        # Reflection
+        # Reflexao
         if material.coeficiente_reflexao > 0:
-            reflected_ray_pos = ponto_intersecao + (normal * 0.01)
-            reflected_ray_dir = (
-                    2 * normal_no_ponto
+            direcao_ray_refletido = (
+                    -2 * normal_no_ponto
                     * (normal_no_ponto.produto_escalar(ray.direcao))
-                    - ray.direcao
+                    + ray.direcao
             ).normalizado()
-            reflected_ray = Ray(reflected_ray_pos, reflected_ray_dir)
 
-            cor += (
-                    get_cor_intersecao(reflected_ray, cena, level + 1)
-                    * material.coeficiente_reflexao
-            )
+            posicao_ray_refletido = ponto_intersecao + (direcao_ray_refletido*0.001)
+            ray_refletido = Ray(posicao_ray_refletido, direcao_ray_refletido)
+            cor_reflexao = get_cor_intersecao(ray_refletido, cena, level + 1)
+            cor += cor_reflexao * material.coeficiente_reflexao
 
-        # Refraction / Transmission
+        # Refracao
         if material.coeficiente_refracao > 0:
-            delta = 1 - (1 / relative_transmission_coeff**2) * (
-                    1 - normal.produto_escalar(omega) ** 2
-            )
 
-            # If delta is positive, the ray is refracted.
-            if delta >= 0:
-                inverse_transmission_coeff = 1 / relative_transmission_coeff
+            """
+            Determina se o Ray está saindo ou entrado no objeto.
+            Os cálculos de refração assumem as normais para fora do objeto. Quando estamos dentro do objeto, precisamos inverter.
+            Ao entrar em um objeto, passamos de n1 (geralmente ar) para n2 (índice do objeto). Ao sair, é o contrário.
+            """
+            if ray.direcao.produto_escalar(normal_no_ponto) > 0:
+                normal_no_ponto = -normal_no_ponto
+                coef_refracao = 1 / material.coeficiente_refracao
 
-                refracted_ray_dir = inverse_transmission_coeff * (
-                        ray.direcao - normal.produto_escalar(ray.direcao) * normal
-                ) - normal * np.sqrt(delta)
-                reflected_ray_pos = ponto_intersecao + (-normal * 0.01)
-                refracted_ray = Ray(reflected_ray_pos, refracted_ray_dir)
+            cos_i = -normal_no_ponto.produto_escalar(ray.direcao)
+            sin2_t = coef_refracao**2 * (1 - cos_i**2)
 
-                cor += (
-                        get_cor_intersecao(refracted_ray, cena, level + 1)
-                        * material.coeficiente_refracao
-                )
-            # If delta is negative, the ray is reflected. (Total internal reflection)
-            else:
-                reflected_ray_dir = (
-                        2 * normal_no_ponto
-                        * (normal_no_ponto.produto_escalar(ray.direcao))
-                        - ray.direcao
+            #if sin2_t > 1:
+            # Total internal reflection
+
+            # Refracao "normal"
+            if sin2_t <= 1:
+                cos_t = np.sqrt(1 - sin2_t)
+                direcao_ray_refratado = (
+                        coef_refracao * ray.direcao
+                        + (coef_refracao*cos_i - cos_t)
+                        * normal_no_ponto
                 ).normalizado()
-                reflected_ray_pos = ponto_intersecao + (normal * 0.01)
-                reflected_ray = Ray(reflected_ray_pos, reflected_ray_dir)
-                cor += (
-                        get_cor_intersecao(reflected_ray, cena, level + 1)
-                        * material.coeficiente_refracao
-                )
+
+                posicao_ray_refratado = ponto_intersecao + (direcao_ray_refratado*0.001)
+                ray_refratado = Ray(posicao_ray_refratado, direcao_ray_refratado)
+                cor_refracao = get_cor_intersecao(ray_refratado, cena, level + 1)
+
+                cor += cor_refracao * objeto_intersecao.material.coeficiente_refracao
 
     return cor
-
 
 
 def renderizar_cena(cena: Cena) -> Imagem:
@@ -191,43 +174,18 @@ def renderizar_cena(cena: Cena) -> Imagem:
 
 def main():
 
-    # Vidro
-    material_esfera1 = Material(
-        cor=Cor(0, 0, 155),
-        coeficiente_difusao=0.1,
-        coeficiente_ambiental=0.1,
-        coeficiente_especular=0.9,
-        coeficiente_rugosidade=0,
-        coeficiente_reflexao=0.05,
-        coeficiente_refracao=1.5
-    )
-
-    # Metal
-    material_esfera2 = Material(
-        cor=Cor(192, 192, 192),
-        coeficiente_difusao=0.3,
-        coeficiente_ambiental=0.1,
-        coeficiente_especular=0.7,
-        coeficiente_rugosidade=0.05,
-        coeficiente_reflexao=0.8,
-        coeficiente_refracao=0
-    )
-
     material_esfera3 = Material(
         cor=Cor(255, 0, 0),
         coeficiente_difusao=0.8,
         coeficiente_ambiental=0.2,
         coeficiente_especular=0.1,
-        coeficiente_rugosidade=0.7,
-        coeficiente_reflexao=0.05,
+        coeficiente_rugosidade=1,
+        coeficiente_reflexao=1,
         coeficiente_refracao=0
     )
 
     objetos = [
-        Esfera(material=material_esfera2, centro=Ponto(0, 0, 0), raio=2),
-        #Esfera(material=material_esfera2, centro=Ponto(-0.5, -3, 1), raio=2),
-        #Esfera(material=material_esfera3, centro=Ponto(0.5, 3, 1), raio=2),
-        #Plano(material=material_plano, normal=Vetor(0, 0, 1), ponto=Ponto(0, 0, 0))
+        Esfera(material=material_esfera3, centro=Ponto(0.5, 3, 1), raio=2),
     ]
 
     camera = Camera(
