@@ -174,6 +174,26 @@ def renderizar_cena(cena: Cena) -> Imagem:
 
 def main():
 
+    material_esfera1 = Material(
+        cor=Cor(0, 0, 255),
+        coeficiente_difusao=0.8,
+        coeficiente_ambiental=0.2,
+        coeficiente_especular=0.1,
+        coeficiente_rugosidade=1,
+        coeficiente_reflexao=1,
+        coeficiente_refracao=0.5
+    )
+
+    material_esfera2 = Material(
+        cor=Cor(0, 255, 0),
+        coeficiente_difusao=0.8,
+        coeficiente_ambiental=0.2,
+        coeficiente_especular=0.1,
+        coeficiente_rugosidade=1,
+        coeficiente_reflexao=1,
+        coeficiente_refracao=0
+    )
+
     material_esfera3 = Material(
         cor=Cor(255, 0, 0),
         coeficiente_difusao=0.8,
@@ -185,19 +205,22 @@ def main():
     )
 
     objetos = [
-        Esfera(material=material_esfera3, centro=Ponto(0.5, 3, 1), raio=2),
+        Esfera(material=material_esfera1, centro=Ponto(-1.25, -1.25, 0), raio=1),
+        Esfera(material=material_esfera3, centro=Ponto(-1.25, 1.25, 0), raio=1),
+        Esfera(material=material_esfera3, centro=Ponto(1.25, -1.25, 0), raio=1),
+        Esfera(material=material_esfera2, centro=Ponto(1.25, 1.25, 0), raio=1),
     ]
 
     camera = Camera(
-        C=Ponto(25, 0, 1),
-        M=Ponto(0, 0, 1),
+        C=Ponto(1.25, 1.25, 10),
+        M=Ponto(-1.25, -1.25, 0),
         Vup=Vetor(0, 0, -1),
         d=5,
         Vres=500,
         Hres=500
     )
 
-    luzes = [Luz(posicao=Ponto(0, -10, 10), cor=Cor(255, 255, 255))]
+    luzes = [Luz(posicao=Ponto(0, 0, 1), cor=Cor(255, 255, 255))]
 
     cena = Cena(
         camera=camera,
