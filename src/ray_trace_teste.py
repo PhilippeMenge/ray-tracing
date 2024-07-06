@@ -181,7 +181,7 @@ def main():
         coeficiente_especular=0.1,
         coeficiente_rugosidade=1,
         coeficiente_reflexao=1,
-        coeficiente_refracao=0.5
+        coeficiente_refracao=0
     )
 
     material_esfera2 = Material(
@@ -190,8 +190,8 @@ def main():
         coeficiente_ambiental=0.2,
         coeficiente_especular=0.1,
         coeficiente_rugosidade=1,
-        coeficiente_reflexao=1,
-        coeficiente_refracao=0
+        coeficiente_reflexao=0.1,
+        coeficiente_refracao=1
     )
 
     material_esfera3 = Material(
@@ -212,7 +212,7 @@ def main():
     ]
 
     camera = Camera(
-        C=Ponto(1.25, 1.25, 10),
+        C=Ponto(10, 10, 10),
         M=Ponto(-1.25, -1.25, 0),
         Vup=Vetor(0, 0, -1),
         d=5,
@@ -220,7 +220,7 @@ def main():
         Hres=500
     )
 
-    luzes = [Luz(posicao=Ponto(0, 0, 1), cor=Cor(255, 255, 255))]
+    luzes = [Luz(posicao=Ponto(0, 0, -1), cor=Cor(255, 255, 255))]
 
     cena = Cena(
         camera=camera,
