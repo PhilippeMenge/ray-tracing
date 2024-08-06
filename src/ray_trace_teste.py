@@ -13,6 +13,7 @@ from plano import Plano
 from material import Material
 from triangulo import Triangulo
 from malha_triangulo import MalhaTriangulos
+from texture import SolidTexture
 
 
 def get_intersecao_mais_proxima(
@@ -157,6 +158,37 @@ def get_cor_intersecao(ray: Ray, cena: Cena, level: int = 0) -> Cor:
 
     return cor
 
+def lambertian_shading(ray: Ray, cena: Cena, level: int = 0) -> Cor:
+    """
+    Calcula a cor de um ponto de interseção de acordo com o modelo de shading de Lambert.
+    """
+    ponto_intersecao, normal_no_ponto, objeto_intersecao = get_intersecao_mais_proxima(ray, cena)
+
+    if objeto_intersecao is None:
+        return cena.cor_ambiente
+
+    cor = cena.cor_ambiente
+
+    for luz in cena.luzes:
+        raio_luz = Ray(ponto_intersecao, luz.posicao - ponto_intersecao)
+        _, _, obj = get_intersecao_mais_proxima(cena=cena, ray=raio_luz)
+
+        if obj is not None and obj != objeto_intersecao:
+            continue
+
+        cor += objeto_intersecao.material.lambertian_aux(
+            luz=luz,
+            ponto_intersecao=ponto_intersecao,
+            normal_no_ponto=normal_no_ponto,
+            solid_texture=SolidTexture(objeto_intersecao.material.cor),
+            u=0,
+            v=0,
+            p=raio_luz.direcao
+        )
+
+    return cor
+
+
 
 def renderizar_cena(cena: Cena) -> Imagem:
     """Renderiza uma cena e retorna uma imagem PPM."""
@@ -165,7 +197,7 @@ def renderizar_cena(cena: Cena) -> Imagem:
     for y in range(cena.camera.Vres):
         for x in range(cena.camera.Hres):
             ray = cena.camera.get_ray(x, y)
-            color = get_cor_intersecao(ray, cena)
+            color = lambertian_shading(ray, cena)
 
             imagem.set_pixel(x, y, color)
 
@@ -204,11 +236,22 @@ def main():
         coeficiente_refracao=0
     )
 
+    material_plano = Material(
+        cor=Cor(255, 255, 255),
+        coeficiente_difusao=0.8,
+        coeficiente_ambiental=0.2,
+        coeficiente_especular=0.1,
+        coeficiente_rugosidade=1,
+        coeficiente_reflexao=1,
+        coeficiente_refracao=0
+    )
+
     objetos = [
         Esfera(material=material_esfera1, centro=Ponto(-1.25, -1.25, 0), raio=1),
         Esfera(material=material_esfera3, centro=Ponto(-1.25, 1.25, 0), raio=1),
         Esfera(material=material_esfera3, centro=Ponto(1.25, -1.25, 0), raio=1),
         Esfera(material=material_esfera2, centro=Ponto(1.25, 1.25, 0), raio=1),
+        
     ]
 
     camera = Camera(
@@ -220,7 +263,7 @@ def main():
         Hres=500
     )
 
-    luzes = [Luz(posicao=Ponto(0, 0, -1), cor=Cor(255, 255, 255))]
+    luzes = [Luz(posicao=Ponto(0, 0, 4), cor=Cor(255, 255, 255))]
 
     cena = Cena(
         camera=camera,

@@ -2,6 +2,7 @@ from cor import Cor
 from luz import Luz
 from vetor import Vetor
 from ponto import Ponto
+from texture import SolidTexture
 import numpy as np
 
 
@@ -43,6 +44,25 @@ class Material:
         return (
                 luz.cor
                 * self.cor
+                * self.coeficiente_difusao
+                * normal_no_ponto.produto_escalar(vetor_para_luz)
+        )
+    
+    def lambertian_aux(
+            self,
+            luz: Luz,
+            normal_no_ponto: Vetor,
+            ponto_intersecao: Ponto,
+            solid_texture: SolidTexture,
+            u: float,
+            v: float,
+            p: Vetor
+    ) -> Cor:
+        """Retorna a componente difusa de acordo com o modelo de Phong."""
+
+        vetor_para_luz = (luz.posicao - ponto_intersecao).normalizado()
+        return (
+                SolidTexture.value(solid_texture, u, v, p)
                 * self.coeficiente_difusao
                 * normal_no_ponto.produto_escalar(vetor_para_luz)
         )
