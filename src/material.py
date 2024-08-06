@@ -63,7 +63,7 @@ class Material:
         vetor_para_luz = (luz.posicao - ponto_intersecao).normalizado()
         return (
                 SolidTexture.value(solid_texture, u, v, p)
-                * self.coeficiente_difusao
+                * luz.cor
                 * normal_no_ponto.produto_escalar(vetor_para_luz)
         )
 

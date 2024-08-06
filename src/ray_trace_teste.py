@@ -263,7 +263,8 @@ def main():
         Hres=500
     )
 
-    luzes = [Luz(posicao=Ponto(0, 0, 4), cor=Cor(255, 255, 255))]
+    luzes = [
+             Luz(posicao=Ponto(5, 5, 4), cor=Cor(255, 255, 255))]
 
     cena = Cena(
         camera=camera,
