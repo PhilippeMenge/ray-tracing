@@ -1,8 +1,11 @@
+from PIL import Image
+import numpy as np
+
 from cor import Cor
 from luz import Luz
 from vetor import Vetor
 from ponto import Ponto
-from texture import SolidTexture
+from texture import SolidTexture, CheckerTexture, ImageTexture
 import numpy as np
 
 
@@ -53,16 +56,26 @@ class Material:
             luz: Luz,
             normal_no_ponto: Vetor,
             ponto_intersecao: Ponto,
-            solid_texture: SolidTexture,
+        #     texture: Texture,
             u: float,
             v: float,
             p: Vetor
     ) -> Cor:
-        """Retorna a componente difusa de acordo com o modelo de Phong."""
+        
+        print("LOG: lambertian_aux")
+
+        # t = CheckerTexture(SolidTexture(Cor(0.2, 0.3, 0.1)), SolidTexture(Cor(0.9, 0.9, 0.9)))
+        image = Image.open("src\\image.jpg")
+        image = image.convert("RGB")
+        width, height = image.size
+        pixels = np.array(image).flatten()
+
+        # Create the ImageTexture instance
+        t = ImageTexture(pixels, width, height)
 
         vetor_para_luz = (luz.posicao - ponto_intersecao).normalizado()
         return (
-                SolidTexture.value(solid_texture, u, v, p)
+                ImageTexture.value(t, u, v, p)
                 * luz.cor
                 * normal_no_ponto.produto_escalar(vetor_para_luz)
         )

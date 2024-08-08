@@ -13,7 +13,7 @@ from plano import Plano
 from material import Material
 from triangulo import Triangulo
 from malha_triangulo import MalhaTriangulos
-from texture import SolidTexture
+from texture import CheckerTexture, SolidTexture
 
 
 def get_intersecao_mais_proxima(
@@ -180,10 +180,10 @@ def lambertian_shading(ray: Ray, cena: Cena, level: int = 0) -> Cor:
             luz=luz,
             ponto_intersecao=ponto_intersecao,
             normal_no_ponto=normal_no_ponto,
-            solid_texture=SolidTexture(objeto_intersecao.material.cor),
-            u=0,
-            v=0,
-            p=raio_luz.direcao
+            # texture=CheckerTexture(),
+            u=ponto_intersecao.x,
+            v=ponto_intersecao.y,
+            p=None
         )
 
     return cor
@@ -247,16 +247,17 @@ def main():
     )
 
     objetos = [
-        Esfera(material=material_esfera1, centro=Ponto(-1.25, -1.25, 0), raio=1),
-        Esfera(material=material_esfera3, centro=Ponto(-1.25, 1.25, 0), raio=1),
-        Esfera(material=material_esfera3, centro=Ponto(1.25, -1.25, 0), raio=1),
-        Esfera(material=material_esfera2, centro=Ponto(1.25, 1.25, 0), raio=1),
-        
+        # Esfera(material=material_esfera1, centro=Ponto(-1.25, -1.25, 0), raio=1),
+        # Esfera(material=material_esfera3, centro=Ponto(-1.25, 1.25, 0), raio=1),
+        # Esfera(material=material_esfera3, centro=Ponto(1.25, -1.25, 0), raio=1),
+        # Esfera(material=material_esfera2, centro=Ponto(1.25, 1.25, 0), raio=1),
+        Esfera(material=material_esfera1, centro=Ponto(0.5, 0.5, 0), raio=0.5),
+        Plano(material=material_plano, ponto=Ponto(0, 0, -1), normal=Vetor(0, 0, 1)),    
     ]
 
     camera = Camera(
         C=Ponto(10, 10, 10),
-        M=Ponto(-1.25, -1.25, 0),
+        M=Ponto(0, 0, 0),
         Vup=Vetor(0, 0, -1),
         d=5,
         Vres=500,
@@ -264,7 +265,7 @@ def main():
     )
 
     luzes = [
-             Luz(posicao=Ponto(5, 5, 4), cor=Cor(255, 255, 255))]
+             Luz(posicao=Ponto(3, 3, 5), cor=Cor(255, 255, 255))]
 
     cena = Cena(
         camera=camera,
