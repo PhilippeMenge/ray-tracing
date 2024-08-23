@@ -1,3 +1,4 @@
+from typing import List
 from camera import Camera
 from cor import Cor
 from objeto import Objeto
@@ -9,8 +10,8 @@ class Cena:
     def __init__(
             self,
             camera: Camera,
-            objetos: [Objeto],
-            luzes: [Luz],
+            objetos: List[Objeto],
+            luzes: List[Luz],
             cor_ambiente: Cor
     ):
         self.camera = camera

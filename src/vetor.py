@@ -39,8 +39,10 @@ class Vetor:
         """Returna a norma do vetor"""
         return abs(self)
 
-    def normalizado(self) -> Self:
+    def normalizado(self) -> Self | None:
         """Retorna o vetor normalizado"""
+        if abs(self) == 0:
+            return None
         return self / abs(self)
 
     def produto_escalar(self, v2: Self) -> float:

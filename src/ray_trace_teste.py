@@ -7,6 +7,9 @@ from cor import Cor
 from ponto import Ponto
 from vetor import Vetor
 from esfera import Esfera
+from cilindro import Cilindro
+from disco import Disco
+from cone import Cone
 from luz import Luz
 from objeto import Objeto
 from plano import Plano
@@ -174,28 +177,38 @@ def renderizar_cena(cena: Cena) -> Imagem:
 
 def main():
 
-    material_esfera1 = Material(
-        cor=Cor(0, 0, 255),
-        coeficiente_difusao=0.8,
-        coeficiente_ambiental=0.2,
-        coeficiente_especular=0.1,
-        coeficiente_rugosidade=1,
-        coeficiente_reflexao=1,
-        coeficiente_refracao=0
-    )
-
-    material_esfera2 = Material(
-        cor=Cor(0, 255, 0),
+    material_cilindro1 = Material(
+        cor=Cor(255, 0, 0),
         coeficiente_difusao=0.8,
         coeficiente_ambiental=0.2,
         coeficiente_especular=0.1,
         coeficiente_rugosidade=1,
         coeficiente_reflexao=0.1,
-        coeficiente_refracao=1
+        coeficiente_refracao=0.1
     )
 
-    material_esfera3 = Material(
+    material_cilindro2 = Material(
+        cor=Cor(0, 255, 0),
+        coeficiente_difusao=0.8,
+        coeficiente_ambiental=0.2,
+        coeficiente_especular=0.1,
+        coeficiente_rugosidade=1,
+        coeficiente_reflexao=0.5,
+        coeficiente_refracao=0.5
+    )
+
+    material_cone1 = Material(
         cor=Cor(255, 0, 0),
+        coeficiente_difusao=1,
+        coeficiente_ambiental=1,
+        coeficiente_especular=0.1,
+        coeficiente_rugosidade=1,
+        coeficiente_reflexao=0.1,
+        coeficiente_refracao=0.5
+    )
+
+    material_cone2 = Material(
+        cor=Cor(160, 160, 160),
         coeficiente_difusao=0.8,
         coeficiente_ambiental=0.2,
         coeficiente_especular=0.1,
@@ -205,27 +218,28 @@ def main():
     )
 
     objetos = [
-        Esfera(material=material_esfera1, centro=Ponto(-1.25, -1.25, 0), raio=1),
-        Esfera(material=material_esfera3, centro=Ponto(-1.25, 1.25, 0), raio=1),
-        Esfera(material=material_esfera3, centro=Ponto(1.25, -1.25, 0), raio=1),
-        Esfera(material=material_esfera2, centro=Ponto(1.25, 1.25, 0), raio=1),
+        # Cone(material=material_cone1, vertice=Ponto(0, 0, 0), altura=2, direcao=Vetor(0, 0, 1), raio_da_base=1),
+        # Cone(material=material_cone2, vertice=Ponto(1, 2, 0), altura=3, direcao=Vetor(0, -1, 0), raio_da_base=0.5),
+        Cilindro(material=material_cilindro1, centro_base=Ponto(0, 0, 0), altura=2, raio=1, direcao=Vetor(0, 0, 1)),
+        # Cilindro(material=material_cilindro1, centro_base=Ponto(0, 0, 0), altura=2, raio=1, direcao=Vetor(0, 0, 1)),
+        # Cilindro(material=material_cilindro2, centro=Ponto(1.25, 1.25, 2), raio=1),
     ]
 
     camera = Camera(
-        C=Ponto(10, 10, 10),
-        M=Ponto(-1.25, -1.25, 0),
+        C=Ponto(10, 5, 5),
+        M=Ponto(0, 0, 0),
         Vup=Vetor(0, 0, -1),
-        d=5,
-        Vres=500,
-        Hres=500
+        d=2,
+        Vres=720,
+        Hres=720
     )
 
-    luzes = [Luz(posicao=Ponto(0, 0, -1), cor=Cor(255, 255, 255))]
+    luzes = [Luz(posicao=Ponto(-10, -10, -10), cor=Cor(255, 255, 255)), Luz(posicao=Ponto(-10, 10, -10), cor=Cor(255, 255, 255)), Luz(posicao=Ponto(10, -10, -10), cor=Cor(255, 255, 255)), Luz(posicao=Ponto(0, 0, -10), cor=Cor(255, 255, 255))]
 
     cena = Cena(
         camera=camera,
         objetos=objetos,
-        cor_ambiente=Cor(0, 0, 0),
+        cor_ambiente=Cor(24, 24, 24),
         luzes=luzes
     )
 
