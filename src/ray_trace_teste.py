@@ -10,6 +10,7 @@ from esfera import Esfera
 from cilindro import Cilindro
 from disco import Disco
 from cone import Cone
+from luz_retangular import LuzRetangular
 from luz import Luz
 from objeto import Objeto
 from plano import Plano
@@ -41,7 +42,6 @@ def get_intersecao_mais_proxima(
         obj_mais_proximo,
     )
 
-
 def get_cor(
         objeto_intersecao: Objeto,
         ponto_intersecao: Ponto,
@@ -49,16 +49,17 @@ def get_cor(
         cena: Cena,
         posicao_observador: Ponto | None = None,
 ) -> Cor:
-    """Retorna a cor de um dado ponto de acordo com o modelo de Phong."""
+    """Retorna a cor de um dado ponto de acordo com o modelo de Phong, incluindo luzes retangulares direcionais."""
     posicao_observador = (
         posicao_observador if posicao_observador else cena.camera.C
     )
 
-    # Ambiental
+    # Componente Ambiental
     cor = objeto_intersecao.material.get_componente_ambiental(
         cena.cor_ambiente
     )
 
+    # Processa luzes normais (pontuais)
     for luz in cena.luzes:
 
         # Sombra
@@ -68,14 +69,46 @@ def get_cor(
         if obj is not None and obj != objeto_intersecao:
             continue
 
-        # Difusa
+        # Iluminação Difusa
         cor += objeto_intersecao.material.get_componente_difusa(
             luz=luz,
             ponto_intersecao=ponto_intersecao,
             normal_no_ponto=normal_no_ponto,
         )
 
-        # Especular
+        # Iluminação Especular
+        cor += objeto_intersecao.material.get_componente_especular(
+            luz=luz,
+            ponto_intersecao=ponto_intersecao,
+            normal_no_ponto=normal_no_ponto,
+            posicao_observador=posicao_observador,
+        )
+
+    # Processa luzes retangulares direcionais
+    for luz in cena.luzes_retangulares:
+
+        # Lançar um raio a partir do ponto de interseção na direção inversa da luz direcional
+        direcao_inversa = -luz.direcao
+        raio_luz = Ray(ponto_intersecao, direcao_inversa)
+
+        # Verifica se o raio intersecta com o retângulo de luz
+        t, _ = luz.get_intersecao(raio_luz)
+        if t is None:
+            continue
+
+        # Verifica se algum objeto bloqueia a luz
+        _, _, obj = get_intersecao_mais_proxima(cena=cena, ray=raio_luz)
+        if obj is not None and obj != objeto_intersecao:
+            continue
+
+        # Iluminação Difusa
+        cor += objeto_intersecao.material.get_componente_difusa(
+            luz=luz,
+            ponto_intersecao=ponto_intersecao,
+            normal_no_ponto=normal_no_ponto,
+        )
+
+        # Iluminação Especular
         cor += objeto_intersecao.material.get_componente_especular(
             luz=luz,
             ponto_intersecao=ponto_intersecao,
@@ -177,38 +210,28 @@ def renderizar_cena(cena: Cena) -> Imagem:
 
 def main():
 
-    material_cilindro1 = Material(
+    material_esfera1 = Material(
         cor=Cor(255, 0, 0),
         coeficiente_difusao=0.8,
-        coeficiente_ambiental=0.2,
+        coeficiente_ambiental=0,
         coeficiente_especular=0.1,
         coeficiente_rugosidade=1,
-        coeficiente_reflexao=0.1,
-        coeficiente_refracao=0.1
+        coeficiente_reflexao=1,
+        coeficiente_refracao=0
     )
 
-    material_cilindro2 = Material(
+    material_esfera2 = Material(
         cor=Cor(0, 255, 0),
         coeficiente_difusao=0.8,
         coeficiente_ambiental=0.2,
         coeficiente_especular=0.1,
         coeficiente_rugosidade=1,
-        coeficiente_reflexao=0.5,
-        coeficiente_refracao=0.5
-    )
-
-    material_cone1 = Material(
-        cor=Cor(255, 0, 0),
-        coeficiente_difusao=1,
-        coeficiente_ambiental=1,
-        coeficiente_especular=0.1,
-        coeficiente_rugosidade=1,
         coeficiente_reflexao=0.1,
-        coeficiente_refracao=0.5
+        coeficiente_refracao=1
     )
 
-    material_cone2 = Material(
-        cor=Cor(160, 160, 160),
+    material_esfera3 = Material(
+        cor=Cor(0, 255, 0),
         coeficiente_difusao=0.8,
         coeficiente_ambiental=0.2,
         coeficiente_especular=0.1,
@@ -218,29 +241,33 @@ def main():
     )
 
     objetos = [
-        # Cone(material=material_cone1, vertice=Ponto(0, 0, 0), altura=2, direcao=Vetor(0, 0, 1), raio_da_base=1),
-        # Cone(material=material_cone2, vertice=Ponto(1, 2, 0), altura=3, direcao=Vetor(0, -1, 0), raio_da_base=0.5),
-        Cilindro(material=material_cilindro1, centro_base=Ponto(0, 0, 0), altura=2, raio=1, direcao=Vetor(0, 0, 1)),
-        # Cilindro(material=material_cilindro1, centro_base=Ponto(0, 0, 0), altura=2, raio=1, direcao=Vetor(0, 0, 1)),
-        # Cilindro(material=material_cilindro2, centro=Ponto(1.25, 1.25, 2), raio=1),
+        Esfera(material=material_esfera1, centro=Ponto(0, -0.75, -1.5), raio=1),
+        Esfera(material=material_esfera3, centro=Ponto(0, 0.75, -4), raio=1.25),
+        # Esfera(material=material_esfera3, centro=Ponto(1.25, -1.25, -2), raio=1),
+        # Esfera(material=material_esfera2, centro=Ponto(1.25, 1.25, -2), raio=1),
     ]
 
     camera = Camera(
-        C=Ponto(10, 5, 5),
+        C=Ponto(10, 0, 5),
         M=Ponto(0, 0, 0),
         Vup=Vetor(0, 0, -1),
-        d=2,
+        d=1.5,
         Vres=720,
         Hres=720
     )
 
-    luzes = [Luz(posicao=Ponto(-10, -10, -10), cor=Cor(255, 255, 255)), Luz(posicao=Ponto(-10, 10, -10), cor=Cor(255, 255, 255)), Luz(posicao=Ponto(10, -10, -10), cor=Cor(255, 255, 255)), Luz(posicao=Ponto(0, 0, -10), cor=Cor(255, 255, 255))]
+    luzes = []
+    # luzes = [Luz(posicao=Ponto(-10, -10, -10), cor=Cor(255, 255, 255)), Luz(posicao=Ponto(-10, 10, -10), cor=Cor(255, 255, 255)), Luz(posicao=Ponto(10, -10, -10), cor=Cor(255, 255, 255)), Luz(posicao=Ponto(0, 0, -10), cor=Cor(255, 255, 255))]
+    # luzes = [Luz(posicao=Ponto(0, -10, 0), cor=Cor(255, 255, 255))]
+    luzes_retangulares = [LuzRetangular(cor=Cor(255, 255, 255), direcao=Vetor(-1, 0, 0), posicao=Ponto(3, 0, -2.5), largura=3, altura=3)]
+    # luzes_retangulares = []
 
     cena = Cena(
         camera=camera,
         objetos=objetos,
         cor_ambiente=Cor(24, 24, 24),
-        luzes=luzes
+        luzes=luzes,
+        luzes_retangulares=luzes_retangulares
     )
 
     img = renderizar_cena(cena)

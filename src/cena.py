@@ -3,6 +3,7 @@ from camera import Camera
 from cor import Cor
 from objeto import Objeto
 from luz import Luz
+from luz_retangular import LuzRetangular
 
 
 class Cena:
@@ -12,10 +13,12 @@ class Cena:
             camera: Camera,
             objetos: List[Objeto],
             luzes: List[Luz],
-            cor_ambiente: Cor
+            luzes_retangulares: List[LuzRetangular],
+            cor_ambiente: Cor,
     ):
         self.camera = camera
-        self.objetos = objetos
         self.luzes = luzes
+        self.luzes_retangulares = luzes_retangulares
         self.cor_ambiente = cor_ambiente
+        self.objetos = objetos
 
