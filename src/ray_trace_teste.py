@@ -49,7 +49,7 @@ def get_cor(
         cena: Cena,
         posicao_observador: Ponto | None = None,
 ) -> Cor:
-    """Retorna a cor de um dado ponto de acordo com o modelo de Phong, incluindo luzes retangulares direcionais."""
+    """Retorna a cor de um dado ponto de acordo com o modelo de Phong, incluindo diferentes tipos de luzes."""
     posicao_observador = (
         posicao_observador if posicao_observador else cena.camera.C
     )
@@ -59,62 +59,64 @@ def get_cor(
         cena.cor_ambiente
     )
 
-    # Processa luzes normais (pontuais)
     for luz in cena.luzes:
 
-        # Sombra
-        raio_luz = Ray(ponto_intersecao, luz.posicao - ponto_intersecao)
-        _, _, obj = get_intersecao_mais_proxima(cena=cena, ray=raio_luz)
+        if isinstance(luz, LuzRetangular):
+            # luzes retangulares
 
-        if obj is not None and obj != objeto_intersecao:
-            continue
+            # lança um raio a partir do ponto de interseção na direção inversa da luz direcional
+            direcao_inversa = -luz.direcao
+            raio_luz = Ray(ponto_intersecao, direcao_inversa)
 
-        # Iluminação Difusa
-        cor += objeto_intersecao.material.get_componente_difusa(
-            luz=luz,
-            ponto_intersecao=ponto_intersecao,
-            normal_no_ponto=normal_no_ponto,
-        )
+            # verifica se o raio colide com o retângulo
+            t, _ = luz.get_intersecao(raio_luz)
+            if t is None:
+                continue
 
-        # Iluminação Especular
-        cor += objeto_intersecao.material.get_componente_especular(
-            luz=luz,
-            ponto_intersecao=ponto_intersecao,
-            normal_no_ponto=normal_no_ponto,
-            posicao_observador=posicao_observador,
-        )
+            # verifica se algum objeto bloqueia a luz
+            _, _, obj = get_intersecao_mais_proxima(cena=cena, ray=raio_luz)
+            if obj is not None and obj != objeto_intersecao:
+                continue
 
-    # Processa luzes retangulares direcionais
-    for luz in cena.luzes_retangulares:
+            # Iluminação Difusa
+            cor += objeto_intersecao.material.get_componente_difusa(
+                luz=luz,
+                ponto_intersecao=ponto_intersecao,
+                normal_no_ponto=normal_no_ponto,
+            )
 
-        # Lançar um raio a partir do ponto de interseção na direção inversa da luz direcional
-        direcao_inversa = -luz.direcao
-        raio_luz = Ray(ponto_intersecao, direcao_inversa)
+            # Iluminação Especular
+            cor += objeto_intersecao.material.get_componente_especular(
+                luz=luz,
+                ponto_intersecao=ponto_intersecao,
+                normal_no_ponto=normal_no_ponto,
+                posicao_observador=posicao_observador,
+            )
 
-        # Verifica se o raio intersecta com o retângulo de luz
-        t, _ = luz.get_intersecao(raio_luz)
-        if t is None:
-            continue
+        else:
+            # luzes normais
 
-        # Verifica se algum objeto bloqueia a luz
-        _, _, obj = get_intersecao_mais_proxima(cena=cena, ray=raio_luz)
-        if obj is not None and obj != objeto_intersecao:
-            continue
+            # Sombra
+            raio_luz = Ray(ponto_intersecao, luz.posicao - ponto_intersecao)
+            _, _, obj = get_intersecao_mais_proxima(cena=cena, ray=raio_luz)
 
-        # Iluminação Difusa
-        cor += objeto_intersecao.material.get_componente_difusa(
-            luz=luz,
-            ponto_intersecao=ponto_intersecao,
-            normal_no_ponto=normal_no_ponto,
-        )
+            if obj is not None and obj != objeto_intersecao:
+                continue
 
-        # Iluminação Especular
-        cor += objeto_intersecao.material.get_componente_especular(
-            luz=luz,
-            ponto_intersecao=ponto_intersecao,
-            normal_no_ponto=normal_no_ponto,
-            posicao_observador=posicao_observador,
-        )
+            # Iluminação Difusa
+            cor += objeto_intersecao.material.get_componente_difusa(
+                luz=luz,
+                ponto_intersecao=ponto_intersecao,
+                normal_no_ponto=normal_no_ponto,
+            )
+
+            # Iluminação Especular
+            cor += objeto_intersecao.material.get_componente_especular(
+                luz=luz,
+                ponto_intersecao=ponto_intersecao,
+                normal_no_ponto=normal_no_ponto,
+                posicao_observador=posicao_observador,
+            )
 
     return cor
 
@@ -251,7 +253,7 @@ def main():
         C=Ponto(10, 0, 5),
         M=Ponto(0, 0, 0),
         Vup=Vetor(0, 0, -1),
-        d=1.5,
+        d=2,
         Vres=720,
         Hres=720
     )
@@ -259,15 +261,14 @@ def main():
     luzes = []
     # luzes = [Luz(posicao=Ponto(-10, -10, -10), cor=Cor(255, 255, 255)), Luz(posicao=Ponto(-10, 10, -10), cor=Cor(255, 255, 255)), Luz(posicao=Ponto(10, -10, -10), cor=Cor(255, 255, 255)), Luz(posicao=Ponto(0, 0, -10), cor=Cor(255, 255, 255))]
     # luzes = [Luz(posicao=Ponto(0, -10, 0), cor=Cor(255, 255, 255))]
+    luzes = []
     luzes_retangulares = [LuzRetangular(cor=Cor(255, 255, 255), direcao=Vetor(-1, 0, 0), posicao=Ponto(3, 0, -2.5), largura=3, altura=3)]
-    # luzes_retangulares = []
 
     cena = Cena(
         camera=camera,
         objetos=objetos,
         cor_ambiente=Cor(24, 24, 24),
-        luzes=luzes,
-        luzes_retangulares=luzes_retangulares
+        luzes=luzes + luzes_retangulares,
     )
 
     img = renderizar_cena(cena)

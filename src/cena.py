@@ -12,13 +12,11 @@ class Cena:
             self,
             camera: Camera,
             objetos: List[Objeto],
-            luzes: List[Luz],
-            luzes_retangulares: List[LuzRetangular],
+            luzes: List[Luz | LuzRetangular],
             cor_ambiente: Cor,
     ):
         self.camera = camera
         self.luzes = luzes
-        self.luzes_retangulares = luzes_retangulares
         self.cor_ambiente = cor_ambiente
         self.objetos = objetos
 
